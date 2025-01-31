@@ -13,4 +13,6 @@ const clientRegisterSchema = clientSchema.omit({
   addressId: true,
 });
 
-export { clientSchema, clientRegisterSchema };
+const updateClientSchema = clientRegisterSchema.partial();
+
+export { clientSchema, clientRegisterSchema, updateClientSchema };
