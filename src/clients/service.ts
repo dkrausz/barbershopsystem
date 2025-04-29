@@ -1,37 +1,62 @@
-import { injectable } from "tsyringe";
+import { inject, injectable } from "tsyringe";
 import { prisma } from "../database/prisma";
 import { IClientService, Tclient, TregisterClient, TupdateClient } from "./interfaces";
-import { clientSchema } from "./schema";
+import { clientSchema, returnClientSchema } from "./schema";
+import { AppError } from "../@shared/errors";
+import { AddressService } from "../address/service";
 
-injectable();
-
+@injectable()
 export class ClientService implements IClientService {
+  constructor(@inject(AddressService) private addressService: AddressService) {}
+
   registerClient = async (payload: TregisterClient): Promise<Tclient> => {
-    const registeredClient = await prisma.client.create({
-      data: payload,
-    });
+    let newPayload;
+    let registeredClient;
+    const { address, ...rest } = payload;
+    if (payload.address) {
+      const registerdAddress = await this.addressService.registerAddress(payload.address);
+      newPayload = { ...rest, addressId: registerdAddress.id };
+      registeredClient = await prisma.client.create({ data: newPayload, include: { address: true } });
+    } else {
+      newPayload = { ...rest };
+      registeredClient = await prisma.client.create({
+        data: newPayload,
+      });
+    }
 
     return clientSchema.parse(registeredClient);
   };
 
   getClients = async (): Promise<Array<Tclient>> => {
     const clientList = await prisma.client.findMany({ include: { address: true } });
-    return clientSchema.array().parse(clientList);
+    return returnClientSchema.array().parse(clientList);
+  };
+
+  getClientById = async (id: string): Promise<Tclient | null> => {
+    const client = await prisma.client.findFirst({ where: { id }, include: { address: true } });
+    if (!client) {
+      throw new AppError(404, "Cliente não encontrado");
+    }
+    return returnClientSchema.parse(client);
   };
 
   getClientByName = async (name: string): Promise<Array<Tclient> | null> => {
-    const clientList = await prisma.client.findMany({ where: { name } });
-    return clientSchema.array().parse(clientList);
+    const client = await prisma.client.findMany({ where: { name }, include: { address: true } });
+    return returnClientSchema.array().parse(client);
   };
 
   getClientByPhone = async (phone: string): Promise<Tclient | null> => {
-    const client = await prisma.client.findFirst({ where: { phone } });
-    return clientSchema.parse(client);
+    const client = await prisma.client.findFirst({ where: { phone }, include: { address: true } });
+    if (!client) {
+      throw new AppError(404, "Cliente não encontrado");
+    }
+
+    return returnClientSchema.parse(client);
   };
 
   updateClient = async (id: string, payload: TupdateClient): Promise<Tclient | null> => {
     const updatedClient = await prisma.client.update({ where: { id }, data: payload });
-    return clientSchema.parse(updatedClient);
+    return returnClientSchema.parse(updatedClient);
   };
 
   deleteClient = async (id: string): Promise<void> => {
