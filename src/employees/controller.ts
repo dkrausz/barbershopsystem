@@ -32,6 +32,6 @@ export class EmployeeController {
   deleteEmployee = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.params;
     const response = await this.employeeService.deleteEmployee(id);
-    return res.status(204);
+    return res.status(204).json("");
   };
 }

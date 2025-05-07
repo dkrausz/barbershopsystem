@@ -3,6 +3,7 @@ import { addressRegisterSchema, addressSchema, addressUpdateSchema } from "./sch
 
 interface IAddress {
   registerAddress(payload: TRegisterAddress): Promise<TAddress>;
+  updateAddress(id: string, payload: TUpdateAddress): Promise<TAddress>;
 }
 
 type TAddress = z.infer<typeof addressSchema>;

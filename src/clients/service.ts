@@ -10,9 +10,9 @@ export class ClientService implements IClientService {
   constructor(@inject(AddressService) private addressService: AddressService) {}
 
   registerClient = async (payload: TregisterClient): Promise<Tclient> => {
-    let newPayload;
-    let registeredClient;
     const { address, ...rest } = payload;
+    let registeredClient;
+    let newPayload;
     if (payload.address) {
       const registerdAddress = await this.addressService.registerAddress(payload.address);
       newPayload = { ...rest, addressId: registerdAddress.id };
@@ -24,7 +24,7 @@ export class ClientService implements IClientService {
       });
     }
 
-    return clientSchema.parse(registeredClient);
+    return returnClientSchema.parse(registeredClient);
   };
 
   getClients = async (): Promise<Array<Tclient>> => {

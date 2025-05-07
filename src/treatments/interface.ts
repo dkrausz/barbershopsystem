@@ -6,6 +6,7 @@ interface ITreatmentService {
   getTreatments(): Promise<Ttreatment[]>;
   getTreamentByName(name: string): Promise<Ttreatment[]>;
   updateTreament(id: string, payload: TupdateTreatment): Promise<Ttreatment>;
+  getListOfTreatmenteByIds(ids: string[]): Promise<Ttreatment[]>;
   deleteTreament(id: string): Promise<void>;
 }
 

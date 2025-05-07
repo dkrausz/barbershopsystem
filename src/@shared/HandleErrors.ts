@@ -12,11 +12,8 @@ export class HandleErrors {
     }
 
     if (err instanceof ZodError) {
-      console.log(err.flatten);
-
       return res.status(400).json({ errors: err.flatten().fieldErrors });
     }
-    console.log(err);
 
     return res.status(500).json({ error: "Internal server error." });
   }
